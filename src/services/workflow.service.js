@@ -102,10 +102,12 @@ const chatGPTProcess = async (messages) => {
 //   }
 // };
 
-const processNewSubmission = async (response, user) => {
+const processStudenResearchNewSubmission = async (response, user) => {
   await sendMessageToWhatsApp(user.mobile_no, "We received a new document");
-  const systemPrompt =
-    "You are very good research.Leverage the search engine, help me to do research or web scrapping about the given data.";
+
+  const count = 5;
+
+  const systemPrompt = `You are very good research.Leverage the search engine, help me to do research or web scrapping about the given data. Provide some sites links.`;
   const userMessage = response;
   const message = [
     {
@@ -118,11 +120,24 @@ const processNewSubmission = async (response, user) => {
     },
   ];
   const chatGPTResponse = await chatGPTProcess(message);
-
   const textToCheck = chatGPTResponse ? chatGPTResponse.choices[0].text : "";
-  //   const plagiarismRate = await checkPlagiarism(textToCheck);
+  const plagiarismCheck = [
+    {
+      role: "system",
+      content:
+        "You are get at plagiarism checking. Please give the plagiarism rate in percentage.",
+    },
+    {
+      role: "user",
+      content: userMessage,
+    },
+  ];
+  const plagiarismRate = await chatGPTProcess(plagiarismCheck);
 
-  const messageBody = `Plagiarism Rate: ${plagiarismRate}`;
+  const messageBody = plagiarismRate.choices[0].text;
+
+  if (plagiarismRate < 20) {
+  }
 
   await sendMessageToWhatsApp(user.mobile_no, messageBody);
 };
@@ -132,7 +147,7 @@ const scheduleCronJobForUser = (user) => {
     console.log(`Running the cron job for user: ${user.userId}`);
     const fileDownloaded = await getGoogleFormFile(user.userId, user.fileId);
     if (fileDownloaded.length > 0) {
-      await processNewSubmission(user);
+      await processStudenResearchNewSubmission(fileDownloaded, user);
     }
   });
 };
