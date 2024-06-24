@@ -102,11 +102,10 @@ const chatGPTProcess = async (messages) => {
 //   }
 // };
 
-const processStudenResearchNewSubmission = async (response, user) => {
-  await sendMessageToWhatsApp(user.mobile_no, "We received a new document");
-
-  const count = 5;
-
+const processStudenResearchNewSubmission = async (response, user, count) => {
+  if (count == 0) {
+    return false;
+  }
   const systemPrompt = `You are very good research.Leverage the search engine, help me to do research or web scrapping about the given data. Provide some sites links.`;
   const userMessage = response;
   const message = [
@@ -121,25 +120,47 @@ const processStudenResearchNewSubmission = async (response, user) => {
   ];
   const chatGPTResponse = await chatGPTProcess(message);
   const textToCheck = chatGPTResponse ? chatGPTResponse.choices[0].text : "";
-  const plagiarismCheck = [
-    {
-      role: "system",
-      content:
-        "You are get at plagiarism checking. Please give the plagiarism rate in percentage.",
-    },
-    {
-      role: "user",
-      content: userMessage,
-    },
-  ];
-  const plagiarismRate = await chatGPTProcess(plagiarismCheck);
+  // const plagiarismCheck = [
+  //   {
+  //     role: "system",
+  //     content:
+  //       "You are good at plagiarism checking. Please give the plagiarism rate in percentage.",
+  //   },
+  //   {
+  //     role: "user",
+  //     content: userMessage,
+  //   },
+  // ];
+  // const plagiarismRate = await chatGPTProcess(plagiarismCheck);
 
-  const messageBody = plagiarismRate.choices[0].text;
+  // const messageBody = plagiarismRate.choices[0].text;
 
-  if (plagiarismRate < 20) {
+  if (plagiarismRate > 20) {
+    const flag = await processStudenResearchNewSubmission(
+      response,
+      user,
+      count - 1
+    );
+    return flag;
+  } else {
+    await sendMessageToWhatsApp(
+      user.mobile_no,
+      "Research completed, review this"
+    );
+    // const systemPrompt = `You need to add human touch to given text.`;
+
+    // const message = [
+    //   {
+    //     role: "system",
+    //     content: systemPrompt,
+    //   },
+    //   {
+    //     role: "user",
+    //     content: textToCheck,
+    //   },
+    // ];
+    // const humanTouchResponse = await chatGPTProcess(message);
   }
-
-  await sendMessageToWhatsApp(user.mobile_no, messageBody);
 };
 
 const scheduleCronJobForUser = (user) => {
