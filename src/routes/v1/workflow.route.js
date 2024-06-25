@@ -1,7 +1,8 @@
 const express = require("express");
-const { route } = require("..");
 const router = express.Router();
+const workflowController = require("../../controllers/workflow.controller");
 
-router.post("/schedule/:workflow_id");
-
-module.exports = route;
+// router.post("/schedule/:workflow_id",);
+// router.post("/whatsapp", );
+router.get("/wrun/seo", workflowController.processSEOGeneration);
+module.exports = router;

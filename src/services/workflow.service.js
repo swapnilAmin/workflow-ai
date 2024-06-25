@@ -3,25 +3,26 @@ const { google } = require("googleapis");
 const OPENAI = require("openai");
 const { StatusCodes } = require("http-status-codes");
 const twilio = require("twilio");
-const axios = require("axios");
 const AppErrors = require("../utils/error-handling");
 const {
-  TWILLIO_ACCOUNT_SID,
-  TWILLIO_AUTH_TOKEN,
+  TWILIO_ACCOUNT_SID,
+  TWILIO_AUTH_TOKEN,
   GOOGLE_API_KEY,
-  OPENAI_KEY,
+  OPENAI_API_KEY,
   GROWSTACKAI_WHATSAPP_NO,
 } = require("../configs/server.config");
-const openai = new OPENAI(OPENAI_KEY);
+const sendEmail = require("../utils/send-email");
+const openai = new OPENAI(OPENAI_API_KEY);
 
-const sendMessageToWhatsApp = async (to, body) => {
+const sendMessageToWhatsApp = async (to, body, media = "") => {
   try {
-    const client = new twilio(TWILLIO_ACCOUNT_SID, TWILLIO_AUTH_TOKEN);
+    const client = new twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 
     const message = await client.messages.create({
       from: `whatsapp:${GROWSTACKAI_WHATSAPP_NO}`,
       to: `whatsapp:${to}`,
       body: body,
+      mediaUrl: media,
     });
     return message;
   } catch (error) {
@@ -59,7 +60,7 @@ const getGoogleFormFile = async (userId, fileId) => {
   }
 };
 
-const chatGPTProcess = async (messages) => {
+const chatGPTProcess = async (messages, creativity) => {
   try {
     const creativitySettings = {
       repetitive: { temperature: 0.0, frequency_penalty: 1.0 },
@@ -73,14 +74,20 @@ const chatGPTProcess = async (messages) => {
       creativitySettings[creativity] || creativitySettings["original"];
 
     const response = await openai.chat.completions.create({
-      model: model,
+      model: "gpt-4",
       messages: messages,
       temperature,
       frequency_penalty,
     });
-    return response;
+    return response.choices[0].message.content;
   } catch (error) {
     console.error("Error communicating with OpenAI:", error);
+    throw new AppErrors(
+      "ServerError",
+      "Could not able generate ai response",
+      "Error occured while generating gpt response",
+      StatusCodes.INTERNAL_SERVER_ERROR
+    );
   }
 };
 
@@ -102,10 +109,30 @@ const chatGPTProcess = async (messages) => {
 //   }
 // };
 
-const processNewSubmission = async (response, user) => {
-  await sendMessageToWhatsApp(user.mobile_no, "We received a new document");
-  const systemPrompt =
-    "You are very good research.Leverage the search engine, help me to do research or web scrapping about the given data.";
+const processWhatsAppMessage = async (message, user) => {
+  if (message.body.toLowerCase() === "reviewed") {
+    await sendMessageToWhatsApp(
+      user.mobile_no,
+      "Thank you for reviewing the research."
+    );
+  } else if (message.body.toLowerCase() === "not satisfied") {
+    await sendMessageToWhatsApp(
+      user.mobile_no,
+      "Sorry to here that, We will enhance our system to generate better research."
+    );
+  } else {
+    await sendMessageToWhatsApp(
+      user.mobile_no,
+      'If you received PDF url then Please review the Research and reply with "Reviewed" when done, else reply with "Not Satisfied" when pdf does not reached expectation, if you do not recevied any pdf link then we are still processing your request'
+    );
+  }
+};
+
+const processStudenResearchNewSubmission = async (response, user, count) => {
+  if (count == 0) {
+    return false;
+  }
+  const systemPrompt = `You are very good research.Leverage the search engine, help me to do research about the given data. Provide some sites links.`;
   const userMessage = response;
   const message = [
     {
@@ -118,23 +145,81 @@ const processNewSubmission = async (response, user) => {
     },
   ];
   const chatGPTResponse = await chatGPTProcess(message);
+  const textToCheck = chatGPTResponse;
+  // const plagiarismCheck = [
+  //   {
+  //     role: "system",
+  //     content:
+  //       "You are good at plagiarism checking. Please give the plagiarism rate in percentage.",
+  //   },
+  //   {
+  //     role: "user",
+  //     content: userMessage,
+  //   },
+  // ];
+  // const plagiarismRate = await chatGPTProcess(plagiarismCheck);
 
-  const textToCheck = chatGPTResponse ? chatGPTResponse.choices[0].text : "";
-  //   const plagiarismRate = await checkPlagiarism(textToCheck);
+  // const messageBody = plagiarismRate.choices[0].text;
 
-  const messageBody = `Plagiarism Rate: ${plagiarismRate}`;
+  if (plagiarismRate > 20) {
+    const flag = await processStudenResearchNewSubmission(
+      response,
+      user,
+      count - 1
+    );
+    return flag;
+  } else {
+    // await sendMessageToWhatsApp(
+    //   user.mobile_no,
+    //   "Research completed, review attached pdf"
+    // );
+    // // const systemPrompt = `You need to add human touch to given text.`;
 
-  await sendMessageToWhatsApp(user.mobile_no, messageBody);
+    // // const message = [
+    // //   {
+    // //     role: "system",
+    // //     content: systemPrompt,
+    // //   },
+    // //   {
+    // //     role: "user",
+    // //     content: textToCheck,
+    // //   },
+    // // ];
+    // // const humanTouchResponse = await chatGPTProcess(message);
+    return textToCheck;
+  }
 };
 
 const scheduleCronJobForUser = (user) => {
-  cron.schedule("*/3 * * * *", async () => {
-    console.log(`Running the cron job for user: ${user.userId}`);
+  cron.schedule("*/3 * * * *", async (user) => {
+    // console.log(`Running the cron job for user: ${user.userId}`);
     const fileDownloaded = await getGoogleFormFile(user.userId, user.fileId);
     if (fileDownloaded.length > 0) {
-      await processNewSubmission(user);
+      await sendMessageToWhatsApp(user.mobile_no, "Received a new ");
+
+      const response = await processStudenResearchNewSubmission(
+        fileDownloaded,
+        user
+      );
+      if (response && response.research) {
+        // upload file to s3
+        await sendMessageToWhatsApp(
+          user.mobile_no,
+          "Research completed, review attached pdf"
+        );
+        await sendEmail(
+          user.email,
+          "Research Reviewed",
+          "Your research has been reviewed."
+        );
+      } else {
+      }
     }
   });
 };
 
-module.exports = { scheduleCronJobForUser };
+module.exports = {
+  scheduleCronJobForUser,
+  processWhatsAppMessage,
+  chatGPTProcess,
+};

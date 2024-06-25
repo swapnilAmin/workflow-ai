@@ -14,6 +14,7 @@
     "axios": "^1.7.2",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
+    "cheerio": "^1.0.0-rc.12",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -39,7 +40,10 @@
     "passport-instagram": "^1.0.0",
     "passport-linkedin-oauth2": "^2.0.0",
     "passport-twitter": "^1.0.4",
+    "puppeteer": "^22.12.0",
     "qs": "^6.12.1",
+    "serpapi": "^2.1.0",
+    "twilio": "^5.2.0",
     "twitter-api-v2": "^1.17.1",
     "twitter-v2": "^1.1.0",
     "validator": "^13.12.0"
