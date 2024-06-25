@@ -48,8 +48,31 @@ const scrapeUrl = async (url) => {
     $("h2").each((index, element) => {
       h2Tags.push($(element).text());
     });
-    console.log(h2Tags);
-    return { h2Tags, html };
+
+    const metaTags = $("meta");
+    let metadata = {};
+    metaTags.each((index, element) => {
+      const name = $(element).attr("name") || $(element).attr("property");
+      const content = $(element).attr("content");
+      if (name && content) {
+        metadata[name] = content;
+      }
+    });
+
+    const metaSummary = {
+      title: $("title").text(),
+      meta: metadata,
+    };
+
+    const bodyText = $("body").text().replace(/\s+/g, " ").trim();
+
+    // const temp = {
+    //   meta: Object.entries(metaSummary.meta)
+    //     .map(([key, value]) => `${key}: ${value}`)
+    //     .join("\n"),
+    // };
+
+    return { h2Tags, website_body: bodyText.replace(/\n/g, "\\n") };
   } catch (error) {
     console.error("Error fetching the page:", error);
     return [];
@@ -120,11 +143,11 @@ const processSEOWorkflow = async (keywords) => {
 
     return {
       "Extract Top 3 URLs": urls,
-      "Scan First URL": firstUrlScraping.html,
+      "Scan First URL": firstUrlScraping.website_body,
       "Extract H2s from first URL": firstUrlScraping.h2Tags,
-      "Scan Second URL": secondUrlScraping.html,
+      "Scan Second URL": secondUrlScraping.website_body,
       "Extract H2s from Second URL": secondUrlScraping.h2Tags,
-      "Scan Third URL": thirdUrlScraping.html,
+      "Scan Third URL": thirdUrlScraping.website_body,
       "Extract H2s from Third URL": thirdUrlScraping.h2Tags,
       "Recommend Page Type": recommendPage,
       "Brainstorm Questions": potentialQuestion,
