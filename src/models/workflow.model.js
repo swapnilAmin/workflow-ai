@@ -1,117 +1,43 @@
 const mongoose = require("mongoose");
-const { isEmail } = require("validator");
-const bcrypt = require("bcryptjs");
-const { SALT } = require("../configs/server.config");
-const UserSchema = mongoose.Schema(
+
+const WorkflowSchema = mongoose.Schema(
   {
     name: {
       type: String,
       // required: true,
     },
-    email: {
-      type: String,
-      required: true,
-      validate: [isEmail, "Please provide a valid email address"],
-      unique: true,
-    },
-    password: {
+    workflow_id: {
       type: String,
     },
-    google_id: {
-      type: String,
-    },
-    facebook_id: {
-      type: String,
-    },
-    instagram_access_token: {
-      type: String,
-    },
-    instagram_refresh_token: {
-      type: String,
-    },
-    instagram_access_token_expiry: {
-      type: Date,
-    },
-    twitter_access_token: {
-      type: String,
-    },
-    twitter_access_token_secret: {
-      type: String,
-    },
-    twitter_oauth_token_secret: {
-      type: String,
-    },
-    // twitter_token_obtain_at: {
-    //   type: Date,
-    // },
-    // twitter_refresh_token_expiry: {
-    //   type: Date,
-    // },
-    twitter_profile: {
-      username: {
-        type: String,
+    inputs: [
+      {
+        label: {
+          type: String,
+          required: true,
+        },
+        placeholder: {
+          type: String,
+        },
       },
-      id: {
-        type: String,
+    ],
+    workflow: [
+      {
+        provider: {
+          type: String,
+          required: true,
+        },
+        action: {
+          type: String,
+          required: true,
+        },
       },
-      image_url: {
-        type: String,
-      },
-      display_name: {
-        type: String,
-      },
-    },
-    linkedin_access_token: {
-      type: String,
-    },
-    linkedin_refresh_token: {
-      type: String,
-    },
-    linkedin_access_token_expiry: {
-      type: Date,
-    },
-    linkedin_refresh_token_expiry: {
-      type: Date,
-    },
-    linkedin_profile: {
-      id: {
-        type: String,
-      },
-      image_url: {
-        type: String,
-      },
-      display_name: {
-        type: String,
-      },
-      username: {
-        type: String,
-      },
-    },
-    google_mybusiness_access_token: {
-      type: String,
-    },
-    google_mybusiness_refresh_token: {
-      type: String,
-    },
-    google_mybusiness_access_token_expiry: {
-      type: Date,
-    },
+    ],
   },
   {
     timestamps: true,
   }
 );
 
-UserSchema.pre("save", async function (next) {
-  this.email = this.email.trim();
-  this.email = this.email.toLowerCase();
-  if (this.password) {
-    this.password = bcrypt.hashSync(this.password, SALT);
-  }
+const Workflow = mongoose.model("workflows", WorkflowSchema);
 
-  next();
-});
-
-const User = mongoose.model("users", UserSchema);
-
-module.exports = User;
+module.exports = Workflow;
