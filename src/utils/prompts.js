@@ -14,10 +14,10 @@ Given the following inputs:
    - Page 2
    - Page 3
 
-Please perform the following tasks:
+Please perform the following tasks (Always generate following titles only):
 
 1. Recommend Page Type:
-    Generate a Page type based on h2 list of top ranked urls.
+   Generate a Page type based on h2 list of top ranked urls.
 
 2. Brainstorm Potential Questions:
    Generate a list of potential questions that users might ask related to the given keywords and based on the H2 headings provided.

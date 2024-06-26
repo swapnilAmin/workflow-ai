@@ -1,22 +1,30 @@
 const axios = require("axios");
 const { getJson } = require("serpapi");
-const { SERP_API_KEY } = require("../configs/server.config");
+const { SERPER_API_KEY } = require("../configs/server.config");
 const AppErrors = require("../utils/error-handling");
 const { StatusCodes } = require("http-status-codes");
 const cheerio = require("cheerio");
-const { chatGPTProcess } = require("./workflow.service");
+const { chatGPTProcess } = require("./student.workflow.service");
 const { SEO_PROMPT } = require("../utils/prompts");
 
 const getTopThreeUrls = async (keywords) => {
   try {
-    // console.log(keywords);
-    const searchResult = await getJson({
-      engine: "google",
+    console.log(keywords);
+    let data = JSON.stringify({
       q: keywords,
-      api_key: SERP_API_KEY,
     });
+    let config = {
+      method: "POST",
+      url: "https://google.serper.dev/search",
+      headers: {
+        "X-API-KEY": SERPER_API_KEY,
+        "Content-Type": "application/json",
+      },
+      data: data,
+    };
+    const searchResult = await axios.request(config);
     console.log(searchResult);
-    const searchResults = searchResult.organic_results;
+    const searchResults = searchResult.data.organic;
     // console.log(searchResults);
     if (searchResults && searchResults.length > 0) {
       const topUrls = searchResults.slice(0, 3).map((result) => result.link);
@@ -64,15 +72,17 @@ const scrapeUrl = async (url) => {
       meta: metadata,
     };
 
+    // const getFirstNWords = (text, wordCount) => {
+    //   return;
+    // };
     const bodyText = $("body").text().replace(/\s+/g, " ").trim();
 
-    // const temp = {
-    //   meta: Object.entries(metaSummary.meta)
-    //     .map(([key, value]) => `${key}: ${value}`)
-    //     .join("\n"),
-    // };
+    const first400Words = bodyText.split(" ").slice(0, 400).join(" ");
 
-    return { h2Tags, website_body: bodyText.replace(/\n/g, "\\n") };
+    const temp = Object.entries(metaSummary.meta)
+      .map(([key, value]) => `${key}: ${value}`)
+      .join("\n");
+    return { h2Tags, website_body: first400Words };
   } catch (error) {
     console.error("Error fetching the page:", error);
     return [];

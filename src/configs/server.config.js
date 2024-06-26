@@ -42,5 +42,5 @@ module.exports = {
   TWILIO_AUTH_TOKEN: process.env.TWILLIO_AUTH_TOKEN,
   GROWSTACKAI_WHATSAPP_NO: process.env.GROWSTACKAI_WHATSAPP_NO,
   OPENAI_API_KEY: process.env.OPENAI_API_KEY,
-  SERP_API_KEY: process.env.SERP_API_KEY,
+  SERPER_API_KEY: process.env.SERPER_API_KEY,
 };
