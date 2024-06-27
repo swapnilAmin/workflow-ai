@@ -155,7 +155,7 @@ class ActionsRepository {
       }
       if (error?.name == "CastError") {
         throw new AppErrors(
-          "NotFoundError",
+          "InvalidDetailError",
           "Actions not found",
           `Actions with filter not found`,
           StatusCodes.NOT_FOUND

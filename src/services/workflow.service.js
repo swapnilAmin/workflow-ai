@@ -39,7 +39,7 @@ class WorkflowService {
       if (
         error?.name == "DatabaseError" ||
         error?.name == "NotFoundError" ||
-        error?.name == "CastError"
+        error?.name == "InvalidDetailError"
       ) {
         throw error;
       }
@@ -60,7 +60,7 @@ class WorkflowService {
       if (
         error?.name == "DatabaseError" ||
         error?.name == "NotFoundError" ||
-        error?.name == "CastError" ||
+        error?.name == "InvalidDetailError" ||
         error?.name == "NotFoundError"
       ) {
         throw error;
@@ -87,7 +87,7 @@ class WorkflowService {
       if (
         error?.name == "DatabaseError" ||
         error?.name == "NotFoundError" ||
-        error?.name == "CastError" ||
+        error?.name == "InvalidDetailError" ||
         error?.name == "NotFoundError"
       ) {
         throw error;
@@ -116,7 +116,7 @@ class WorkflowService {
       if (
         error?.name == "DatabaseError" ||
         error?.name == "NotFoundError" ||
-        error?.name == "CastError" ||
+        error?.name == "InvalidDetailError" ||
         error?.name == "NotFoundError"
       ) {
         throw error;
@@ -160,7 +160,7 @@ class WorkflowService {
       if (
         error?.name == "DatabaseError" ||
         error?.name == "NotFoundError" ||
-        error?.name == "CastError"
+        error?.name == "InvalidDetailError"
       ) {
         throw error;
       }
@@ -181,7 +181,7 @@ class WorkflowService {
       if (
         error?.name == "DatabaseError" ||
         error?.name == "NotFoundError" ||
-        error?.name == "CastError" ||
+        error?.name == "InvalidDetailError" ||
         error?.name == "NotFoundError"
       ) {
         throw error;
@@ -208,7 +208,7 @@ class WorkflowService {
       if (
         error?.name == "DatabaseError" ||
         error?.name == "NotFoundError" ||
-        error?.name == "CastError" ||
+        error?.name == "InvalidDetailError" ||
         error?.name == "NotFoundError"
       ) {
         throw error;
@@ -238,7 +238,7 @@ class WorkflowService {
       if (
         error?.name == "DatabaseError" ||
         error?.name == "NotFoundError" ||
-        error?.name == "CastError" ||
+        error?.name == "InvalidDetailError" ||
         error?.name == "NotFoundError"
       ) {
         throw error;
@@ -316,7 +316,7 @@ class WorkflowService {
       if (
         error?.name == "DatabaseError" ||
         error?.name == "NotFoundError" ||
-        error?.name == "CastError" ||
+        error?.name == "InvalidDetailError" ||
         error?.name == "NotFoundError"
       ) {
         throw error;
@@ -367,7 +367,7 @@ class WorkflowService {
       if (
         error?.name == "DatabaseError" ||
         error?.name == "NotFoundError" ||
-        error?.name == "CastError" ||
+        error?.name == "InvalidDetailError" ||
         error?.name == "NotFoundError"
       ) {
         throw error;
