@@ -16,24 +16,30 @@ const ActionSchema = mongoose.Schema(
       required: true,
     },
     provider: {
-      type: String,
+      type: String, //openai
       required: true,
     },
     subtype: {
-      type: String,
+      type: String, //gpt
     },
     presetJson: {
       body: {
         instruction: {
-          type: String,
+          type: String, //prompt
         },
         model: {
           type: String,
         },
       },
+      mixed: {
+        type: mongoose.Schema.Types.Mixed,
+      },
     },
     event_execute: {
       type: String,
+    },
+    built: {
+      type: Boolean,
     },
   },
   {

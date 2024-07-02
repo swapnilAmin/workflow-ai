@@ -11,7 +11,7 @@ const anthropicChatCompletion = async (model, systemPrompt, userPrompt) => {
   try {
     const response = anthropic.messages.create(
       (model = "claude-3-5-sonnet-20240620"),
-      (max_tokens = 2048),
+      // (max_tokens = 2048),
       (system = systemPrompt),
       (messages = [
         {
@@ -31,7 +31,12 @@ const anthropicChatCompletion = async (model, systemPrompt, userPrompt) => {
   }
 };
 
-const chatGPTProcess = async (messages, creativity) => {
+const chatGPTProcess = async (
+  messages,
+  model = "gpt-4o",
+  creativity,
+  responseFormat
+) => {
   try {
     const creativitySettings = {
       repetitive: { temperature: 0.0, frequency_penalty: 1.0 },
@@ -45,13 +50,15 @@ const chatGPTProcess = async (messages, creativity) => {
       creativitySettings[creativity] || creativitySettings["original"];
 
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: model,
       messages: messages,
       temperature,
       frequency_penalty,
+      response_format: responseFormat,
     });
     return response.choices[0].message.content;
   } catch (error) {
+    console.log(error);
     throw new AppErrors(
       "ServerError",
       "Could not able generate ai response",

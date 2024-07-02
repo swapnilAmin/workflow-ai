@@ -101,7 +101,7 @@ const extractSection = (response, sectionTitle) => {
   return [];
 };
 
-const processSEOWorkflow = async (keywords) => {
+const processSEOWorkflow = async (keywords, res) => {
   try {
     const topThreeUrls = await getTopThreeUrls(keywords);
 
@@ -113,11 +113,22 @@ const processSEOWorkflow = async (keywords) => {
     if (topThreeUrls.length >= 3) {
       var thirdUrlScraping = await scrapeUrl(topThreeUrls[2]);
     }
-
+    var format = {
+      recommend_page_type:
+        "detailed response for recommend page type based on input. (IN MARKDOWN FORMAT)",
+      brainstorm_questions: "1.question_1 \n 2. question_2",
+      brainstorm_blog_titles: "1.blog_title_1 \n 2.blog_title_2",
+      generated_url_slugs: "1.url_slug_1 \n 2.url_slug_2",
+      generated_outline:
+        "##<h2>h2_tag_1_title</h2> \n -h2_tag_1_subtopics \n ##<h2>h2_tag_2_title</h2> \n -h2_tag_2_subtopics",
+      generated_meta_description: "meta description",
+      final_content_brief: "Combined content of results",
+    };
+    format = JSON.stringify(format);
     const message = [
       {
         role: "system",
-        content: SEO_PROMPT,
+        content: SEO_PROMPT + `GENERATE IN JSON with this format: ${format}`,
       },
       {
         role: "user",
@@ -129,27 +140,30 @@ const processSEOWorkflow = async (keywords) => {
                - Page 3: ${thirdUrlScraping.h2Tags}`,
       },
     ];
-    const chatResponse = await chatGPTProcess(message);
+    var chatResponse = await chatGPTProcess(message, "gpt-4o", "", {
+      type: "json_object",
+    });
     console.log(chatResponse);
     const urls = {
       first_url: topThreeUrls[0],
       second_url: topThreeUrls[1],
       third_url: topThreeUrls[2],
     };
-    const recommendPage = extractSection(chatResponse, "Recommend Page Type");
+    // const recommendPage = extractSection(chatResponse, "Recommend Page Type");
 
-    console.log(recommendPage);
-    const potentialQuestion = extractSection(
-      chatResponse,
-      "Brainstorm Potential Questions"
-    );
-    const blogTitles = extractSection(chatResponse, "Generate Blog Titles");
-    const urlSlugs = extractSection(chatResponse, "Generate URL Slugs");
-    const outline = extractSection(chatResponse, "Create an Outline");
-    const metaDescription = extractSection(
-      chatResponse,
-      "Generate Meta Description"
-    );
+    // console.log(recommendPage);
+    // const potentialQuestion = extractSection(
+    //   chatResponse,
+    //   "Brainstorm Potential Questions"
+    // );
+    // const blogTitles = extractSection(chatResponse, "Generate Blog Titles");
+    // const urlSlugs = extractSection(chatResponse, "Generate URL Slugs");
+    // const outline = extractSection(chatResponse, "Create an Outline");
+    // const metaDescription = extractSection(
+    //   chatResponse,
+    //   "Generate Meta Description"
+    // );
+    chatResponse = JSON.parse(chatResponse);
 
     return {
       "Extract Top 3 URLs": urls,
@@ -159,12 +173,7 @@ const processSEOWorkflow = async (keywords) => {
       "Extract H2s from Second URL": secondUrlScraping.h2Tags,
       "Scan Third URL": thirdUrlScraping.website_body,
       "Extract H2s from Third URL": thirdUrlScraping.h2Tags,
-      "Recommend Page Type": recommendPage,
-      "Brainstorm Questions": potentialQuestion,
-      "Brainstorm Blog titles": blogTitles,
-      "Generate URL Slug": urlSlugs,
-      "Generate Outline": outline,
-      "Generate Meta Description": metaDescription,
+      ...chatResponse,
       //   "Final Content Brief": chatResponse,
     };
   } catch (error) {

@@ -54,7 +54,7 @@ class ActionsRepository {
       throw new AppErrors(
         "DatabaseError",
         "Database operation failed",
-        "Error retrieving assistant",
+        "Error retrieving actions",
         StatusCodes.INTERNAL_SERVER_ERROR
       );
     }
@@ -86,7 +86,7 @@ class ActionsRepository {
       throw new AppErrors(
         "DatabaseError",
         "Database operation failed",
-        "Error retrieving assistant",
+        "Error retrieving actions",
         StatusCodes.INTERNAL_SERVER_ERROR
       );
     }
@@ -111,7 +111,7 @@ class ActionsRepository {
       throw new AppErrors(
         "DatabaseError",
         "Database operation failed",
-        "Error retrieving assistant",
+        "Error retrieving actions",
         StatusCodes.INTERNAL_SERVER_ERROR
       );
     }
@@ -136,7 +136,7 @@ class ActionsRepository {
       throw new AppErrors(
         "DatabaseError",
         "Database operation failed",
-        "Error retrieving assistant",
+        "Error deleting actions",
         StatusCodes.INTERNAL_SERVER_ERROR
       );
     }

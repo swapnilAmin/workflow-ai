@@ -1,6 +1,8 @@
 var randomstring = require("randomstring");
 const WorkflowRepository = require("../repository/workflow.repository");
 const ActionsRepository = require("../repository/actions.repository");
+const InputConfigRepository = require("../repository/input-config.repository");
+const OutputConfigRepository = require("../repository/output-config.repository");
 const AppErrors = require("../utils/error-handling");
 const { StatusCodes } = require("http-status-codes");
 const mongoose = require("mongoose");
@@ -9,6 +11,8 @@ class WorkflowService {
   constructor() {
     this.workflowRepo = new WorkflowRepository();
     this.actionsRepo = new ActionsRepository();
+    this.outputConfigRepo = new OutputConfigRepository();
+    // this.inputConfigRepo = new InputConfigRepository();
   }
 
   async createWorkflow(data) {
@@ -131,16 +135,267 @@ class WorkflowService {
       session.endSession();
     }
   }
+  async addInputToWorkflow(workflow_id, data) {
+    try {
+      const updateWorkflow = await this.workflowRepo.update(
+        { workflow_id },
+        {
+          $push: { input_configs: data },
+        }
+      );
 
-  async createAction(data) {
+      return updateWorkflow;
+    } catch (error) {
+      if (
+        error?.name == "DatabaseError" ||
+        error?.name == "NotFoundError" ||
+        error?.name == "CastError" ||
+        error?.name == "NotFoundError"
+      ) {
+        throw error;
+      }
+      throw new AppErrors(
+        "ServerError",
+        "Internal Server Error",
+        "Something Went Wrong",
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  async updateInputInWorkflow(workflow_id, input_id, data) {
+    try {
+      const updateWorkflow = await this.workflowRepo.update(
+        { workflow_id, "input_configs._id": input_id },
+        {
+          $set: { "input_configs.$": data },
+        }
+      );
+
+      return updateWorkflow;
+    } catch (error) {
+      if (
+        error?.name == "DatabaseError" ||
+        error?.name == "NotFoundError" ||
+        error?.name == "CastError" ||
+        error?.name == "NotFoundError"
+      ) {
+        throw error;
+      }
+      throw new AppErrors(
+        "ServerError",
+        "Internal Server Error",
+        "Something Went Wrong",
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+  async deleteInputFromWorkflow(workflow_id, input_id) {
+    try {
+      const updateWorkflow = await this.workflowRepo.update(
+        { workflow_id },
+        {
+          $pull: { input_configs: { _id: input_id } },
+        }
+      );
+
+      return updateWorkflow;
+    } catch (error) {
+      if (
+        error?.name == "DatabaseError" ||
+        error?.name == "NotFoundError" ||
+        error?.name == "CastError" ||
+        error?.name == "NotFoundError"
+      ) {
+        throw error;
+      }
+      throw new AppErrors(
+        "ServerError",
+        "Internal Server Error",
+        "Something Went Wrong",
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+  async getInputFromWorkflow(workflow_id, input_id) {
+    try {
+      const workflowInput = await this.workflowRepo.getByFilter({
+        workflow_id,
+        "input_configs._id": input_id,
+      });
+
+      return workflowInput;
+    } catch (error) {
+      if (
+        error?.name == "DatabaseError" ||
+        error?.name == "NotFoundError" ||
+        error?.name == "CastError" ||
+        error?.name == "NotFoundError"
+      ) {
+        throw error;
+      }
+      throw new AppErrors(
+        "ServerError",
+        "Internal Server Error",
+        "Something Went Wrong",
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+  async addOutputToWorkflow(workflow_id, data) {
+    try {
+      const updateWorkflow = await this.workflowRepo.update(
+        { workflow_id },
+        {
+          $push: { output_configs: data },
+        }
+      );
+
+      return updateWorkflow;
+    } catch (error) {
+      if (
+        error?.name == "DatabaseError" ||
+        error?.name == "NotFoundError" ||
+        error?.name == "CastError" ||
+        error?.name == "NotFoundError"
+      ) {
+        throw error;
+      }
+      throw new AppErrors(
+        "ServerError",
+        "Internal Server Error",
+        "Something Went Wrong",
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  async updateOutputInWorkflow(workflow_id, output_id, data) {
+    try {
+      const updateWorkflow = await this.workflowRepo.update(
+        { workflow_id, "output_configs._id": output_id },
+        {
+          $set: { "output_configs.$": data },
+        }
+      );
+
+      return updateWorkflow;
+    } catch (error) {
+      if (
+        error?.name == "DatabaseError" ||
+        error?.name == "NotFoundError" ||
+        error?.name == "CastError" ||
+        error?.name == "NotFoundError"
+      ) {
+        throw error;
+      }
+      throw new AppErrors(
+        "ServerError",
+        "Internal Server Error",
+        "Something Went Wrong",
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+  async deleteOutputFromWorkflow(workflow_id, output_id) {
+    try {
+      const updateWorkflow = await this.workflowRepo.update(
+        { workflow_id },
+        {
+          $pull: { output_configs: { _id: output_id } },
+        }
+      );
+
+      return updateWorkflow;
+    } catch (error) {
+      if (
+        error?.name == "DatabaseError" ||
+        error?.name == "NotFoundError" ||
+        error?.name == "CastError" ||
+        error?.name == "NotFoundError"
+      ) {
+        throw error;
+      }
+      throw new AppErrors(
+        "ServerError",
+        "Internal Server Error",
+        "Something Went Wrong",
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+  async getOutputFromWorkflow(workflow_id, output_id) {
+    try {
+      const workflowInput = await this.workflowRepo.getByFilter({
+        workflow_id,
+        "output_configs._id": output_id,
+      });
+
+      return workflowInput;
+    } catch (error) {
+      if (
+        error?.name == "DatabaseError" ||
+        error?.name == "NotFoundError" ||
+        error?.name == "CastError" ||
+        error?.name == "NotFoundError"
+      ) {
+        throw error;
+      }
+      throw new AppErrors(
+        "ServerError",
+        "Internal Server Error",
+        "Something Went Wrong",
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  async createAction(workflow_id, indexOfAction, data) {
     try {
       data.action_id = "acp_" + randomstring.generate(14);
+
+      const workflow = await this.workflowRepo.getByFilter({ workflow_id });
+
+      if (!workflow) {
+        throw new AppErrors(
+          "NotFoundError",
+          "Workflow not found",
+          "The specified workflow does not exist",
+          StatusCodes.NOT_FOUND
+        );
+      }
       const action = await this.actionsRepo.create(data);
-      return action;
+
+      if (indexOfAction < 0 || indexOfAction > workflow.actions.length) {
+        throw new AppErrors(
+          "InvalidDataError",
+          "Index outof bound",
+          "Invalid Index",
+          StatusCodes.BAD_REQUEST
+        );
+      }
+      var newActions;
+      if (workflow?.actions?.length == 0) {
+        newActions = [action];
+      } else {
+        newActions = workflow?.actions?.splice(indexOfAction, 0, action._id);
+      }
+
+      const updateDraftWorkflow = await this.updateWorkflow(
+        { workflow_id },
+        {
+          actions: newActions,
+        }
+      );
+      return {
+        newAction: action,
+        updateDraftWorkflow,
+      };
     } catch (error) {
       if (
         error?.name == "ValidationError" ||
-        error?.name == "MongoServerError"
+        error?.name == "MongoServerError" ||
+        error?.name == "NotFoundError"
       ) {
         throw error;
       }
@@ -331,34 +586,34 @@ class WorkflowService {
   }
   async removeWorkflowsAction(workflow_id, action_id) {
     try {
-      const workflow = await this.workflowRepo.getByFilter({ workflow_id });
+      // const workflow = await this.workflowRepo.getByFilter({ workflow_id });
 
-      if (!workflow) {
-        throw new AppErrors(
-          "NotFoundError",
-          "Workflow not found",
-          "The specified workflow does not exist",
-          StatusCodes.NOT_FOUND
-        );
-      }
+      // if (!workflow) {
+      //   throw new AppErrors(
+      //     "NotFoundError",
+      //     "Workflow not found",
+      //     "The specified workflow does not exist",
+      //     StatusCodes.NOT_FOUND
+      //   );
+      // }
 
-      const index = workflow.actions.indexOf(action_id);
+      // const index = workflow.actions.indexOf(action_id);
 
-      if (index === -1) {
-        throw new AppErrors(
-          "ValidationError",
-          "Action ID not found",
-          "The specified action ID does not exist in the workflow",
-          StatusCodes.BAD_REQUEST
-        );
-      }
+      // if (index === -1) {
+      //   throw new AppErrors(
+      //     "ValidationError",
+      //     "Action ID not found",
+      //     "The specified action ID does not exist in the workflow",
+      //     StatusCodes.BAD_REQUEST
+      //   );
+      // }
 
-      const newActions = workflow.actions.splice(index, 1);
+      // const newActions = workflow.actions.splice(index, 1);
 
       const updateWorkflow = await this.updateWorkflow(
         { workflow_id },
         {
-          actions: newActions,
+          $pull: { actions: action_id },
         }
       );
       const deletedAction = await this.deleteAction({ action_id });

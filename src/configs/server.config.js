@@ -43,4 +43,5 @@ module.exports = {
   GROWSTACKAI_WHATSAPP_NO: process.env.GROWSTACKAI_WHATSAPP_NO,
   OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   SERPER_API_KEY: process.env.SERPER_API_KEY,
+  COPYLEAKS_API_KEY: process.env.COPYLEAKS_API_KEY,
 };
