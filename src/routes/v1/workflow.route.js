@@ -56,24 +56,17 @@ router.delete(
 router.post("/actions", workflowController.addActionToWorkflow);
 
 // Get all actions
-router.get("/actions", async (req, res, next) => {
-  try {
-    const actions = await workflowService.getActions(req.query);
-    res.status(200).json(actions);
-  } catch (error) {
-    next(error);
-  }
-});
+router.get("/actions",workflowController.);
 
 // Get a single action
-router.get("/actions/:id", async (req, res, next) => {
-  try {
-    const action = await workflowService.getAction({ _id: req.params.id });
-    res.status(200).json(action);
-  } catch (error) {
-    next(error);
-  }
-});
+// router.get("/actions/:id", async (req, res, next) => {
+//   try {
+//     const action = await workflowService.getAction({ _id: req.params.id });
+//     res.status(200).json(action);
+//   } catch (error) {
+//     next(error);
+//   }
+// });
 
 // Update an action
 router.put("/actions/:id", async (req, res, next) => {
